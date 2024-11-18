@@ -106,12 +106,12 @@
                     fetch(`/timesheet/api.php?action=delete_event&id=${info.event.id}`);
                 },
                 drop: function(info) {
-                    console.log('Item dropped on:', info.dateStr);
+                    //console.log('Item dropped on:', info.dateStr);
 
                     // Example of creating an event from a drop
                     calendar.addEvent({
-                        title: info.draggedEl.textContent, // Use the text from the dragged element
-                        start: info.dateStr
+                        //title: info.draggedEl.textContent, // Use the text from the dragged element
+                        //start: info.dateStr
                     });
                 }
 
