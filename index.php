@@ -1,3 +1,7 @@
+<?php
+require 'variables.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,13 +26,17 @@
             float: right;
             padding: 15px;
         }
+        .modal-dialog {
+            max-width: 600px;
+            margin: 1.75rem auto;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div id="calendar"></div>
         <div id="task-list">
-            <h4>Task Templates</h4>
+            <h4><?php echo $user_name; ?></h4>
             <div class="accordion" id="taskAccordion">
                 <!-- Example Task Group -->
                 <div class="accordion-item">
@@ -48,32 +56,53 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel"><?php echo $modal_edit_event_title; ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Placeholder for future content -->
+                    <p>Edit form will go here in future steps.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- FullCalendar JS -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/main.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/index.global.min.js"></script>
     <!-- jQuery (optional for drag-and-drop) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Custom JS -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            let clickTimer = null; // Timer to differentiate single click from double click
             var calendarEl = document.getElementById('calendar');
 
             // Initialize the calendar
             var calendar = new FullCalendar.Calendar(calendarEl, {
+                locale: 'it',
                 initialView: 'timeGridDay',
                 editable: true, // Allows dragging within the calendar
                 droppable: true, // Allows items to be dropped into the calendar
                 headerToolbar: {
-                    left: 'prev,next today',
+                    left: 'timeGridDay,timeGridWeek,dayGridMonth',
                     center: 'title',
-                    right: 'timeGridDay,timeGridWeek,dayGridMonth'
+                    right: 'prev,next today'
                 },
-                events: '/timesheet/api.php?action=fetch_events', // Event source URL
+                events: '<?php echo $api_url; ?>?action=fetch_events', // Event source URL
                 eventReceive: function(info) {
                     // Create event in the database
-                    fetch('/timesheet/api.php?action=create_event', {
+                    fetch('<?php echo $api_url; ?>?action=create_event', {
                         method: 'POST',
                         body: JSON.stringify({
                             title: info.event.title,
@@ -87,7 +116,7 @@
                 },
                 eventChange: function(info) {
                     // Update event in the database
-                    fetch('/timesheet/api.php?action=update_event', {
+                    fetch('<?php echo $api_url; ?>?action=update_event', {
                         method: 'POST',
                         body: JSON.stringify({
                             id: info.event.id,
@@ -99,11 +128,41 @@
                     });
                 },
                 eventClick: function(info) {
-                    // TODO: Show modal for editing
+                    if (clickTimer) {
+                        // If timer exists, this is a double click
+                        clearTimeout(clickTimer); // Clear the timer
+                        clickTimer = null;
+
+                        // Handle double click
+                        var modal = new bootstrap.Modal(document.getElementById('editModal'), {});
+                        modal.show();
+                    } else {
+                        // If no timer exists, this is a single click
+                        clickTimer = setTimeout(() => {
+                            clickTimer = null;
+
+                            // Handle single click (edit title)
+                            let newTitle = prompt("<?php echo $evt_single_click_change_title_msg; ?>", info.event.title);
+                            if (newTitle) {
+                                info.event.setProp('title', newTitle);
+                                // Update the event title in the database
+                                fetch('<?php echo $api_url; ?>?action=update_event', {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                        id: info.event.id,
+                                        title: newTitle,
+                                        start_time: info.event.startStr,
+                                        end_time: info.event.endStr
+                                    }),
+                                    headers: { 'Content-Type': 'application/json' }
+                                });
+                            }
+                        }, 200); // Delay to differentiate single and double click (300ms)
+                    }
                 },
                 eventRemove: function(info) {
                     // Delete event from the database
-                    fetch(`/timesheet/api.php?action=delete_event&id=${info.event.id}`);
+                    fetch(`<?php echo $api_url; ?>?action=delete_event&id=${info.event.id}`);
                 },
                 drop: function(info) {
                     //console.log('Item dropped on:', info.dateStr);

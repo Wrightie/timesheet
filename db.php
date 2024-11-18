@@ -1,8 +1,6 @@
 <?php
-$host = 'localhost';
-$dbname = 'task_calendar_db';
-$username = 'calendar_user';
-$password = 'secure_password';
+
+require 'variables.php';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
