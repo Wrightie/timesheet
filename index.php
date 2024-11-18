@@ -79,7 +79,8 @@ require 'variables.php';
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- FullCalendar JS -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/index.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.15/index.global.min.js"></script>
+    <script src="js/locales/it.global.min.js"></script>
     <!-- jQuery (optional for drag-and-drop) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Custom JS -->
@@ -95,7 +96,8 @@ require 'variables.php';
                 editable: true, // Allows dragging within the calendar
                 droppable: true, // Allows items to be dropped into the calendar
                 headerToolbar: {
-                    left: 'timeGridDay,timeGridWeek,dayGridMonth',
+                    //left: 'timeGridDay,timeGridWeek,dayGridMonth',
+                    left: 'timeGridDay,timeGridWeek',
                     center: 'title',
                     right: 'prev,next today'
                 },
